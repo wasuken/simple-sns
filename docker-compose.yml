@@ -1,0 +1,43 @@
+version: '3'
+
+services:
+  app:
+    build: ./app
+    depends_on:
+      - db
+    ports:
+        - '8888:80'
+        - '8889:3000'
+    volumes:
+      - ./app/src:/var/www/laravel_docker
+      - ./apache/default.conf:/etc/apache2/sites-enabled/000-default.conf
+  db:
+    image: postgres:14.2-alpine
+    hostname: db
+    ports:
+      - 5433:5432
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: sns
+      POSTGRES_INITDB_ARGS: "--encoding=UTF-8"
+    volumes:
+      - ./initdb.d:/docker-entrypoint-initdb.d
+  pgadmin:
+        image: dpage/pgadmin4:6.7
+        container_name: pgadmin
+        ports:
+            - 8000:80
+        volumes:
+            - pgadmin4_volume:/var/lib/pgadmin
+        environment:
+            PGADMIN_DEFAULT_EMAIL: admin
+            PGADMIN_DEFAULT_PASSWORD: admin
+            PGADMIN_DEFAULT_EMAIL: admin@example.com
+        hostname: pgadmin
+        depends_on:
+          - db
+        restart: always
+
+volumes:
+  pgadmin4_volume:
